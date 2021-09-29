@@ -1,0 +1,219 @@
+2021-09-24
+문제 해결
+node 10 이하에서 빌드 (mac: v8.16.2)
+https://nodejs.org/download/release/latest-v10.x/
+
+최초 실행 시
+Current working directory is not a Cordova-based project.
+라고 나오는 경우
+$ ./mkandroid.sh
+실행해서 cordova 환경으로 만들 것
+
+Cannot find module 'htmlparser2' 에러가 나올 경우
+$ npm install && cd mobile && npm install
+
+빌드 중 onesignal-cordova-plugin 에러가 나올 경우
+$ cordova plugin add onesignal-cordova-plugin@2.4.5# 각 플러그인 버전은 mobile/config.win.xml 참고
+mars.mobile.1st\mobil
+e\platforms\android\src\com\plugin\gcm\OneSignalPush.java:159: error: strings in
+ switch are not supported in -source 1.6
+    switch(action) {
+          ^
+  (use -source 7 or higher to enable strings in switch)
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+Note: Some input files use unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+1 error
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':compileDebugJavaWithJavac'.
+> Compilation failed; see the compiler error output for details.
+
+* Try:
+Run with --stacktrace option to get the stack trace. Run with --info or --debug
+option to get more log output.
+
+* Get more help at https://help.gradle.org
+
+BUILD FAILED in 4s
+FAILED
+
+$ cordova prepare android 안 될 경우
+AppData\Roaming\npm\node_modules\cordova\node_modules\fs-extra\lib
+\mkdirs\make-dir.js:85
+      } catch {
+              ^
+SyntaxError: Unexpected token {
+라고 나오면 
+npm uninstall -g cordova && npm install -g cordova@6.5.0
+https://github.com/apache/cordova/issues/251#issuecomment-717206227
+
+com.mbc.nps.mars D/SystemWebChromeClient: file:///android_asset/www/main.과 함께 Uncaught TypeError: Cannot read property가 나오면 webpack 확인
+https://github.com/webpack/webpack/issues/583#issuecomment-181605940
+
+Explanation for issues of type "MissingTranslation": 에러를 없애려면
+build.gradle 에서 lintOptions에        disable 'MissingTranslation', 'ExtraTranslation' 
+추가
+https://forum.ionicframework.com/t/suddenly-gets-error-when-compiling-for-release-only-android/54113/2
+
+Detected problems with api compatibility (visit g.co/dev/appcompat for more info)
+라고 나오면
+Android 10 (API level 29) 이상에서는
+$ adb shell settings put global hidden_api_policy  1
+Android 9 (API level 28) 에서는
+$ adb shell settings put global hidden_api_policy_pre_p_apps  1
+$ adb shell settings put global hidden_api_policy_p_apps 1
+https://github.com/react-native-image-picker/react-native-image-picker/issues/978#issue-381037783
+추가로 설정하려면 해당 API level SDK Build-Tools 설치하고 build.gradle에서 cdvBuildToolsVersion = '버전';
+
+CommonsChunkPlugin 에러 나오면
+SplitChunksPlugin으로 변경
+https://webpack.js.org/plugins/commons-chunk-plugin/#root
+adb를 찾지 못하면서 앱설치가 안 될 경우 에뮬레이터 Settings로 들어가서 Use detected ADB location에서 수동으로 AppData/Local/Android/Sdk/platform-tools/adb 경로 지정
+
+
+This usually happens because your environment has changed since running `npm install`.
+Run `npm rebuild node-sass` to download the binding for your current environment.
+https://github.com/sass/node-sass/issues/2512#issuecomment-5058419092021-09-08
+시크릿모드 아닌 일반창에서 chrome://inspect/#devices
+폰 개발자옵션에서 USB debugging 켜 놓음
+https://developer.android.com/studio/run/oem-usb 아랫쪽 사이트에서 OEM 드라이버
+받아서 설치 (삼성 - http://developer.samsung.com/galaxy/others/android-usb-driver-for-windows)
+Windows Update / 장치 관리자 - 휴대용 장치 - 드라이버 업데이트(P)
+https://developer.android.com/studio/command-line/adb 에서 platform-tools 받아서
+ adb 확인
+터미널에서 adb devices 또는 adb start-server 실행
+
+2021-09-09
+자바는 1.8
+
+apk 빌드 안 되면
+$ cordova platform rm android && cordova platform add android@6.3.0
+
+$ cordova plugin add onesignal-cordova-plugin@2.4.5 # 각 플러그인 버전은 mobile/config.win.xml 참고
+
+Nexus 5X API 25 (Android 7.1.1)
+
+$ ./mkandroid.prd.sh
+
+
+1. app\config\config.stg.json 에서 값 변경
+2. package.json - mobile.debug.win 에서 development 를 stage 로 변경
+3. MARS 바로 가기 속성에서 --app 제거
+4. https://add0n.com/useragent-switcher.html 등으로 ua 변경
+5. 개발자도구에서 Ctrl+Shift+M 으로 터치 에뮬레이션
+6. 터미널에서 ipconfig | findstr /C:"IPv4 " 실행해서 IP 확인 # getipaddr.bat 참고
+7. 확인한IP:8090(포트)로 브라우저에서 접속
+
+"_mobile.build.win.2": "cmd /c set NODE_ENV=stage | webpack --display-reasons --display-exclude --display-error-details --colors --config webpack.mob.stg.config.js",
+
+
+2021-08-11
+운영배포
+	./build.prd.win.bat
+	store/ mars/ *.exe 는 남김
+운영DB로 큐시트 테스트하려면 "연습" 으로 검색 (AD연습용 등)
+mars.npsm.co.kr
+
+
+MARS 모바일 실행 방법
+$ npm i 하여 webpack-dev-server 설치 # node_modules/.bin/ 에 설치되어있어야 한다
+$ cmd /c _webpack-dev-server.bat development webpack.mob.dev.config.js mobile/www 8090 을 수동으로 입력하여 address: '주소' 확인
+모바일 stg 서버
+package.json
+	"_mobile.build.win.2.stg": "cmd /c set NODE_ENV=stage | webpack --display-reasons --display-exclude --display-error-details --colors --config webpack.mob.stg.config.js",
+	"mobile.build.stg.win": "npm run _mobile.build.win.1 | npm run _mobile.build.win.2.stg",
+	"mobile.debug.stg.win": "cmd /c _webpack-dev-server.bat stage webpack.mob.stg.config.js mobile/www/ 8091",
+	config.stg.json
+◦	{
+    "api": {
+        "url": {
+            "vpn": "https://mnvpn.npsm.co.kr",
+            "mars": "http://10.153.151.78",
+            "nrcs": "http://10.153.151.78/nrcs",
+            "mam": "http://mamstage.newsnps.co.kr/v5",
+            "midas": "http://midas.npsm.co.kr",
+            "mamupload": "http://10.153.151.72/mam/v5",
+            "push": "ws://10.153.151.73:61614",
+            "spell": "http://marsvscan1.npsm.co.kr/speller-service"
+        },
+        "loc_url": {
+            "nrcs": "http://10.153.151.78/nrcs",
+            "spell": "http://lmarsvscan1.npsm.co.kr/speller-service",
+            "push": "ws://lmarsif.npsm.co.kr:61614"
+        }
+    }
+}
+
+
+71web -> 78db(10.153.181.72:1521) $ ./build.stg.win.bat # /mars.1st.release/released_yyyymmdd_hhiiss_stg 형식으로 출력
+78web -> prddb(npsdb.npsm.co.kr:1521) $ ./build.dev.win.bat # /mars.1st.release/released_yyyymmdd_hhiiss_devwin 형식으로 출력
+
+·	stg(.78) config 바꿔서 테스트용 배포
+o	https://jjanddakdevlogg.tistory.com/entry/XSS-CSRF-CORS
+o	https://velog.io/@nayeon/CORS-%EA%B0%9C%EB%85%90%EA%B3%BC-%EA%B0%84%EB%8B%A8%ED%95%9C-XSS-CSRF-%EC%86%8C%EA%B0%9C
+o	chrome://flags/#unsafely-treat-insecure-origin-as-secure
+§	--unsafely-treat-insecure-origin-as-secure="http://midas.npsm.co.kr/"
+
+·	UA 탐지
+o	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Safari/605.1.15
+var isBrowser = typeof window !== 'undefined' && typeof document !== 'undefined';
+var ua = isBrowser ? navigator.userAgent : '';
+var iOS = !!ua.match(/iPad/i) || !!ua.match(/iPhone/i);
+var webkit = !!ua.match(/WebKit/i);
+var iOSSafari = iOS && webkit && !ua.match(/CriOS/i);
+var is_safari = /^((?!chrome|android).)*safari/i.test(ua);
+var isSafari = !!navigator.userAgent.match(/Version\/[\d\.]+.*Safari/); 
+
+·	터치 테스트 환경
+1.	https://add0n.com/useragent-switcher.html 등으로 ua 변경
+2.	--app 옵션 없이 iron 61 실행
+3.	nrcs}/?entry=cue 로 주소 직접 입력하여 이동
+4.	Ctrl+Shift+I 또는 F12에서 Ctrl+Shift+M 으로 터치 에뮬레이션
+
+o	$ ssh webnrcs@10.153.151.78:/home/webnrcs/webtob/docs/nrcs # staging
+
+·	midas.npsm.co.kr/?searchengine
+·	검색엔진 동의어 설정
+·	midas.npsm.co.kr/?bridge
+o	for premiere NLE interface
+·	https://wikidocs.net/book/372
+·	설정
+o	버전 비교표 - https://docs.sencha.com/cmd/latest/guides/compatibility_matrix.html#compatibility_matrix_-_minimum_sencha_cmd_version_by_framework
+o	https://cdn.sencha.com/cmd/6.5.2/jre/SenchaCmd-6.5.2-windows-64bit.zip 설치
+§	설치 안 될 경우
+·	export EXE4J_JAVA_HOME="32비트jdk"
+o	 https://cdn.sencha.com/ext/gpl/ext-6.2.0-gpl.zip 압축해제
+o	mkdir mbc_proxima
+o	sencha -sdk ext-6.2.0/ generate app mbc_proxima mbc_proxima
+o	git clone http://USERID@geminisoft.iptime.org:10000/ariel_v_devel/mbc_proxima_v/mbc_proxima_v_with_extjs.git
+o	mbc_proxima 에서 mbc_proxima_v_with_extjs 와 겹치는 파일을 복사하거나 이동
+o	mkdir generated
+o	cp -r app packages resources generated
+o	cp app.js app.json index.html generated
+o	mbc_proxima_v_with_extjs 로부터 mbc_proxima 로 파일을 복사하거나 이동
+o	cp -r app packages resources ../mbc_proxima
+o	cp app* index* main.jsp readme.me video_test* .project ../mbc_proxima
+o	cd ../mbc_proxima && sencha app watch
+o	index.html
+§	라인 673 부근 Ext.envBuild
+·	'stage' // 테스트용 서버 / 등록 후 사용
+·	'local' // 운영 서버
+·	'tobe' // 운영 서버 / 배포용
+o	참고
+§	app.framework.version=
+§	app.cmd.version=
+·	.sencha/app/sencha.cfg
+·	ext-6.2.0/.sencha/package/sencha.cfg
+·	HOMEPATH/bin/Sencha/Cmd/repo/.sencha/repo/sencha.cfg
+
+·	배포 참관
+o	build.prd.win.bat
+o	ssh webtob@10.155.152.10{1,2}:/app/webtob/bin
+o	$ wsdown -i # 서비스 내리기
+o	mobile/ , .exe 등 서버에만 있는 파일은 보존
+o	$ wsboot # 서비스 가동
+o	__version.json에서 yyyy-mm-dd hh:ii:ss 가져와서 시스템관리 - 코드관리 - MARS UI 업데이트 - Web - 추가필드에 입력
